@@ -1,4 +1,7 @@
 import React, { useMemo, useState } from "react";
+import { races, levelWeights, terrainPenalty } from "./src/domain/racesData.js";
+import { compatibilityScore, compatibilityVerdict, difficultyLabel, difficultyScore, elevationRatio, getDistanceScore } from "./src/domain/scoring.js";
+import { formatDate, formatDuration, formatPace } from "./src/utils/formatters.js";
 
 const iconPaths = {
   activity: "M4 12h4l2-7 4 14 2-7h4",
@@ -30,49 +33,7 @@ function Icon({ name, size = 20, className = "" }) {
   );
 }
 
-const races = [
-  { id: 1, name: "Trail des Flandres", location: "Bailleul", region: "Hauts-de-France", date: "2026-04-18", distanceKm: 42, elevationGainM: 950, terrainType: "Mixte", technicalityLevel: "Modérée", cutoffTimeMinutes: 600, lastFinisherTimeMinutes: 572, medianFinisherTimeMinutes: 430, aidStationsCount: 4, priceEur: 48, description: "Trail vallonné typique des Flandres, alternant chemins agricoles, sentiers boisés, montées courtes et passages potentiellement boueux.", tags: ["Idéal reprise", "Barrières larges"], gradient: "from-emerald-900 via-lime-700 to-orange-300" },
-  { id: 2, name: "Ultra Vosgien", location: "Gérardmer", region: "Grand Est", date: "2026-06-27", distanceKm: 72, elevationGainM: 3200, terrainType: "Montagne", technicalityLevel: "Difficile", cutoffTimeMinutes: 960, lastFinisherTimeMinutes: 942, medianFinisherTimeMinutes: 760, aidStationsCount: 7, priceEur: 92, description: "Parcours exigeant de moyenne montagne, avec longues montées, descentes techniques et gestion de l’effort sur la durée.", tags: ["Prépa ultra", "Technique"], gradient: "from-slate-900 via-emerald-800 to-cyan-300" },
-  { id: 3, name: "Marathon des Crêtes", location: "Le Tholy", region: "Grand Est", date: "2026-09-20", distanceKm: 42, elevationGainM: 1900, terrainType: "Montagne", technicalityLevel: "Soutenue", cutoffTimeMinutes: 510, lastFinisherTimeMinutes: 478, medianFinisherTimeMinutes: 380, aidStationsCount: 5, priceEur: 55, description: "Format marathon très dense en dénivelé, adapté aux coureurs déjà à l’aise sur terrain technique et descentes longues.", tags: ["Technique", "Crêtes"], gradient: "from-stone-900 via-orange-700 to-amber-300" },
-  { id: 4, name: "Trail des Flandres Ultra", location: "Bailleul", region: "Hauts-de-France", date: "2026-04-18", distanceKm: 115, elevationGainM: 2800, terrainType: "Mixte", technicalityLevel: "Difficile", cutoffTimeMinutes: 1440, lastFinisherTimeMinutes: 1395, medianFinisherTimeMinutes: 1120, aidStationsCount: 10, priceEur: 125, description: "Ultra long et usant, moins montagneux qu’un alpin mais exigeant par la durée, la météo possible et la répétition des relances.", tags: ["Ultra", "Gestion chrono"], gradient: "from-emerald-950 via-emerald-700 to-lime-300" },
-  { id: 5, name: "SaintéLyon", location: "Saint-Étienne → Lyon", region: "Auvergne-Rhône-Alpes", date: "2026-12-05", distanceKm: 78, elevationGainM: 2100, terrainType: "Nocturne", technicalityLevel: "Soutenue", cutoffTimeMinutes: 960, lastFinisherTimeMinutes: 940, medianFinisherTimeMinutes: 710, aidStationsCount: 6, priceEur: 98, description: "Course mythique de nuit, roulante par moments mais piégeuse par le froid, la fatigue et les longues portions nocturnes.", tags: ["Nocturne", "Mythique"], gradient: "from-indigo-950 via-slate-800 to-orange-300" },
-  { id: 6, name: "Trail du Jura", location: "Les Rousses", region: "Bourgogne-Franche-Comté", date: "2026-07-11", distanceKm: 55, elevationGainM: 2400, terrainType: "Montagne", technicalityLevel: "Difficile", cutoffTimeMinutes: 720, lastFinisherTimeMinutes: 698, medianFinisherTimeMinutes: 545, aidStationsCount: 5, priceEur: 69, description: "Format intermédiaire parfait pour progresser vers le long, avec un ratio D+/km sérieux et un terrain parfois cassant.", tags: ["Étape intermédiaire", "D+"], gradient: "from-sky-950 via-emerald-700 to-lime-200" },
-];
-
-const levelWeights = { Reprise: 0.72, Régulier: 0.88, Confirmé: 1.05, Expert: 1.22 };
-const terrainPenalty = {
-  Plat: { Mixte: 0, Montagne: -9, Nocturne: -7, Forêt: -2 },
-  Vallonné: { Mixte: 4, Montagne: -4, Nocturne: -3, Forêt: 3 },
-  Forêt: { Mixte: 4, Montagne: -5, Nocturne: -3, Forêt: 5 },
-  Montagne: { Mixte: 6, Montagne: 9, Nocturne: 1, Forêt: 5 },
-  Mixte: { Mixte: 6, Montagne: 1, Nocturne: 0, Forêt: 4 },
-};
-
 function cx(...classes) { return classes.filter(Boolean).join(" "); }
-function formatDate(date) { return new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "2-digit", month: "long", year: "numeric" }).format(new Date(date)); }
-function formatDuration(totalMinutes) { const h = Math.floor(totalMinutes / 60); const m = totalMinutes % 60; return `${h}h${String(m).padStart(2, "0")}`; }
-function formatPace(totalMinutes, distanceKm) { const pace = totalMinutes / distanceKm; const min = Math.floor(pace); const sec = Math.round((pace - min) * 60); return sec === 60 ? `${min + 1}’00/km` : `${min}’${String(sec).padStart(2, "0")}/km`; }
-function elevationRatio(race) { return Math.round(race.elevationGainM / race.distanceKm); }
-function getDistanceScore(distanceKm) { if (distanceKm < 20) return 10; if (distanceKm <= 42) return 25; if (distanceKm <= 70) return 45; if (distanceKm <= 100) return 65; return 85; }
-function getElevationScore(ratio) { if (ratio < 15) return 8; if (ratio <= 30) return 18; if (ratio <= 50) return 30; return 42; }
-function getTerrainScore(level) { if (level === "Modérée") return 8; if (level === "Soutenue") return 15; return 22; }
-function getCutoffScore(race) { const cutoffPace = race.cutoffTimeMinutes / race.distanceKm; if (cutoffPace >= 13) return 4; if (cutoffPace >= 11) return 8; if (cutoffPace >= 9) return 14; return 20; }
-function difficultyScore(race) { const score = getDistanceScore(race.distanceKm) * 0.55 + getElevationScore(elevationRatio(race)) * 0.8 + getTerrainScore(race.technicalityLevel) + getCutoffScore(race); return Math.min(100, Math.round(score)); }
-function difficultyLabel(score) { if (score < 35) return { label: "Accessible", color: "bg-emerald-50 text-emerald-700 ring-emerald-200" }; if (score < 60) return { label: "Modérée", color: "bg-lime-50 text-lime-700 ring-lime-200" }; if (score < 78) return { label: "Soutenue", color: "bg-orange-50 text-orange-700 ring-orange-200" }; return { label: "Difficile", color: "bg-red-50 text-red-700 ring-red-200" }; }
-function compatibilityScore(profile, race) {
-  const levelWeight = levelWeights[profile.currentLevel] ?? 0.85;
-  const distanceCapacity = Math.max(1, profile.maxDistanceKm * (1.25 + levelWeight * 0.55));
-  const elevationCapacity = Math.max(1, profile.maxElevationGainM * (1.15 + levelWeight * 0.55));
-  const distanceFit = Math.min(100, (distanceCapacity / race.distanceKm) * 100);
-  const elevationFit = Math.min(100, (elevationCapacity / race.elevationGainM) * 100);
-  const weeklyFit = Math.min(100, (profile.weeklyVolumeKm / Math.max(25, race.distanceKm * 0.72)) * 100);
-  const timeFit = Math.min(100, (profile.availableTrainingHours / Math.max(4, race.distanceKm / 13)) * 100);
-  const terrainFit = 75 + (terrainPenalty[profile.usualTerrain]?.[race.terrainType] ?? 0);
-  const objectiveBonus = profile.objective === "Finir" ? 4 : profile.objective === "Préparer un ultra" && race.distanceKm >= 70 ? 7 : 0;
-  const score = distanceFit * 0.27 + elevationFit * 0.22 + weeklyFit * 0.22 + timeFit * 0.16 + terrainFit * 0.13 + objectiveBonus;
-  return Math.max(0, Math.min(100, Math.round(score)));
-}
-function compatibilityVerdict(score) { if (score < 40) return { label: "Trop ambitieux actuellement", color: "text-red-700", bg: "bg-red-50" }; if (score < 60) return { label: "Possible mais risqué", color: "text-orange-700", bg: "bg-orange-50" }; if (score < 80) return { label: "Ambitieux mais réaliste", color: "text-emerald-800", bg: "bg-emerald-50" }; return { label: "Très adapté", color: "text-emerald-800", bg: "bg-emerald-50" }; }
 
 function runSelfTests() {
   const assert = (condition, message) => { if (!condition) throw new Error(`TrailMatch self-test failed: ${message}`); };
