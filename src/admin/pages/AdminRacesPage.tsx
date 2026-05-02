@@ -16,26 +16,19 @@ export function AdminRacesPage() {
   const load = async () => {
     setLoading(true);
     setError(null);
-    try {
-      const data = await getRaces({ page: 0, size: 100 });
-      setRaces(data.items);
-    } catch (err: unknown) {
-      setError(normalizeApiError(err));
-    } finally {
-      setLoading(false);
-    }
+    try { const data = await getRaces({ page: 0, size: 100 }); setRaces(data.items); } catch (err: unknown) { setError(normalizeApiError(err)); } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
-  return <div><h1>Admin races</h1>
+  return <div className="fade-in-up"><h1>Admin races</h1>
     {actionError ? <InlineError error={actionError} /> : null}
     {loading ? <LoadingState /> : null}
     {!loading && error ? <ErrorState error={error} onRetry={load} showAdminRelogin={error.code === 'UNAUTHORIZED'} /> : null}
     {!error ? <AdminRaceForm onSubmit={async (v) => { try { setActionError(null); await createAdminRace(v as any); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }} /> : null}
-    {!error ? <ul>{races.map((race) => <li key={race.id}>{race.name}
-      <button onClick={async () => { try { setActionError(null); await patchAdminRace(race.id, { isCancelled: !race.isCancelled }); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }}>Patch</button>
+    {!error ? <ul className="admin-list">{races.map((race) => <li className="admin-item" key={race.id}><div><strong>{race.name}</strong><div className="muted">{race.location} • {race.date} • {race.distanceKm} km</div></div>
+      <div className="admin-actions"><button onClick={async () => { try { setActionError(null); await patchAdminRace(race.id, { isCancelled: !race.isCancelled }); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }}>{race.isCancelled ? 'Réactiver' : 'Annuler'}</button>
       <button onClick={() => setEditing(race)}>Edit</button>
-      <button onClick={async () => { try { setActionError(null); await deleteAdminRace(race.id); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }}>Delete</button>
+      <button onClick={async () => { try { setActionError(null); await deleteAdminRace(race.id); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }}>Delete</button></div>
     </li>)}</ul> : null}
     {editing && !error ? <AdminRaceForm initial={editing} onSubmit={async (v) => { try { setActionError(null); await updateAdminRace(editing.id, v as UpdateRaceDto); setEditing(null); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }} /> : null}
   </div>;

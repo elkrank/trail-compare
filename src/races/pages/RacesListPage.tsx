@@ -21,15 +21,10 @@ export function RacesListPage() {
     setLoading(true);
     setError(null);
     getRaces({
-      region: filters.region || undefined,
-      terrain: filters.terrain || undefined,
+      region: filters.region || undefined, terrain: filters.terrain || undefined,
       minDistance: filters.minDistance ? Number(filters.minDistance) : undefined,
       maxDistance: filters.maxDistance ? Number(filters.maxDistance) : undefined,
-      minDate: filters.minDate || undefined,
-      maxDate: filters.maxDate || undefined,
-      page,
-      size: 10,
-      sort: filters.sort,
+      minDate: filters.minDate || undefined, maxDate: filters.maxDate || undefined, page, size: 10, sort: filters.sort,
     }).then((response) => {
       setItems(response.items);
       setTotal(response.total);
@@ -38,15 +33,16 @@ export function RacesListPage() {
     }).finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    loadRaces();
-  }, [filters, page]);
+  useEffect(() => { loadRaces(); }, [filters, page]);
 
-  return <div><h1>Courses</h1><RaceFilters filters={filters} onChange={setFilters} />
+  return <div className="fade-in-up"><h1>Courses</h1><p className="muted">Trouvez votre prochaine aventure trail.</p><RaceFilters filters={filters} onChange={setFilters} />
     {loading ? <LoadingState /> : null}
     {!loading && error ? <ErrorState error={error} onRetry={loadRaces} /> : null}
     {!loading && !error && items.length === 0 ? <EmptyState message="Aucune course trouvée." /> : null}
-    {!loading && !error && items.length > 0 ? <ul>{items.map((race) => <li key={race.id}><Link to={`/races/${race.id}`}>{race.name}</Link></li>)}</ul> : null}
+    {!loading && !error && items.length > 0 ? <div className="grid-cards" style={{ marginTop: '1rem' }}>{items.map((race) => <article className="race-card fade-in-up" key={race.id}><h3>{race.name}</h3>
+      <div className="meta-row"><span>{race.distanceKm} km</span><span>•</span><span>{race.date}</span><span>•</span><span>{race.location}</span></div>
+      <Link className="cta-link" to={`/races/${race.id}`}>Voir les détails →</Link>
+    </article>)}</div> : null}
     <RacePagination page={page} total={total} pageSize={10} onPageChange={setPage} />
   </div>;
 }
