@@ -20,14 +20,15 @@ export interface RaceListResponseDto {
 }
 
 export interface RaceFiltersDto {
-  search?: string;
-  location?: string;
-  startDate?: IsoDateString;
-  endDate?: IsoDateString;
-  minDistanceKm?: number;
-  maxDistanceKm?: number;
+  region?: string;
+  terrain?: string;
+  minDistance?: number;
+  maxDistance?: number;
+  minDate?: IsoDateString;
+  maxDate?: IsoDateString;
   page?: number;
-  pageSize?: number;
+  size?: number;
+  sort?: string;
 }
 
 export interface CreateRaceDto {
@@ -47,25 +48,7 @@ export interface UpdateRaceDto {
   isCancelled?: boolean;
 }
 
-export interface AdminLoginRequestDto {
-  username: string;
-  password: string;
-}
-
-export interface AdminLoginResponseDto {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: 'Bearer';
-  expiresIn: number;
-}
-
-export interface AdminRefreshRequestDto {
-  refreshToken: string;
-}
-
-export interface AdminRefreshResponseDto {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: 'Bearer';
-  expiresIn: number;
-}
+export interface AdminLoginRequestDto { username: string; password: string; }
+export interface AdminLoginResponseDto { accessToken: string; refreshToken: string; tokenType: 'Bearer'; expiresIn: number; }
+export interface AdminRefreshRequestDto { refreshToken: string; }
+export interface AdminRefreshResponseDto { accessToken: string; refreshToken: string; tokenType: 'Bearer'; expiresIn: number; }
