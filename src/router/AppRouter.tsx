@@ -70,10 +70,11 @@ export function Route({ path, children }: { path: string; children: (params: Rou
   return <>{children(match.params)}</>;
 }
 
-export function Link({ to, children }: { to: string; children: React.ReactNode }) {
+export function Link({ to, children, className }: { to: string; children: React.ReactNode; className?: string }) {
   const { navigate } = useRouter();
   return (
     <a
+      className={className}
       href={to}
       onClick={(event) => {
         event.preventDefault();
