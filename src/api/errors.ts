@@ -12,7 +12,8 @@ export type ApiErrorCode =
 export interface ApiError {
   code: ApiErrorCode;
   status?: number;
-  message: string;
+  userMessage: string;
+  technicalMessage: string;
   details?: unknown;
 }
 
@@ -31,12 +32,33 @@ export class AppApiError extends Error {
   readonly details?: unknown;
 
   constructor(error: ApiError) {
-    super(error.message);
+    super(error.userMessage);
     this.name = 'AppApiError';
     this.code = error.code;
     this.status = error.status;
     this.details = error.details;
+    this.userMessage = error.userMessage;
+    this.technicalMessage = error.technicalMessage;
   }
+
+  readonly userMessage: string;
+  readonly technicalMessage: string;
+}
+
+function buildUserMessage(code: ApiErrorCode, status?: number): string {
+  if (code === 'UNAUTHORIZED') {
+    return 'Session expirée ou accès non autorisé. Merci de vous reconnecter.';
+  }
+
+  if (code === 'NOT_FOUND' || status === 404) {
+    return 'La ressource demandée est introuvable.';
+  }
+
+  if (code === 'NETWORK_ERROR') {
+    return 'Erreur réseau. Vérifiez votre connexion puis réessayez.';
+  }
+
+  return 'Une erreur est survenue. Merci de réessayer.';
 }
 
 export function normalizeApiError(input: unknown): AppApiError {
@@ -47,21 +69,23 @@ export function normalizeApiError(input: unknown): AppApiError {
   if (input instanceof Error) {
     return new AppApiError({
       code: 'NETWORK_ERROR',
-      message: input.message || 'Network request failed',
+      userMessage: buildUserMessage('NETWORK_ERROR'),
+      technicalMessage: input.message || 'Network request failed',
       details: input,
     });
   }
 
   return new AppApiError({
     code: 'UNKNOWN_ERROR',
-    message: 'An unknown API error occurred',
+    userMessage: buildUserMessage('UNKNOWN_ERROR'),
+    technicalMessage: 'An unknown API error occurred',
     details: input,
   });
 }
 
 export function fromHttpError(
   status: number,
-  message: string,
+  technicalMessage: string,
   details?: unknown,
 ): AppApiError {
   const code =
@@ -71,7 +95,8 @@ export function fromHttpError(
   return new AppApiError({
     code,
     status,
-    message,
+    userMessage: buildUserMessage(code, status),
+    technicalMessage,
     details,
   });
 }
