@@ -1,0 +1,3 @@
+import React from 'react';
+import { Link } from '../router/AppRouter';
+export function HomePage() { return <div className="fade-in-up"><h1>TrailMatch</h1><p className="muted">Choisissez la bonne course selon votre niveau réel.</p><div className="admin-actions"><Link to="/courses" className="cta-link">Explorer les courses</Link><Link to="/profil" className="cta-link">Mon profil</Link><Link to="/comparer" className="cta-link">Comparer</Link></div><h2>Comment ça marche ?</h2><ol><li>Je renseigne mon profil.</li><li>Je choisis des courses.</li><li>TrailMatch estime la compatibilité.</li></ol></div>; }
