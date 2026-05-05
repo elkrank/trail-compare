@@ -19,6 +19,13 @@ export interface RaceListResponseDto {
   pageSize: number;
 }
 
+export interface SpringPageResponseDto<T> {
+  content: T[];
+  totalElements: number;
+  number: number;
+  size: number;
+}
+
 export interface RaceFiltersDto {
   region?: string;
   terrain?: string;
