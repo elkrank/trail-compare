@@ -1,12 +1,25 @@
 export type IsoDateString = `${number}-${number}-${number}`;
+export type TerrainType = 'MOUNTAIN' | 'FOREST' | 'MIXED' | 'ROAD' | 'DESERT';
+export type TechnicalityLevel = 'EASY' | 'MODERATE' | 'HARD' | 'EXTREME';
 
 export interface RaceDto {
   id: string;
   name: string;
   location: string;
+  region: string;
   date: IsoDateString;
   distanceKm: number;
   elevationGainM: number;
+  terrainType: TerrainType;
+  technicalityLevel: TechnicalityLevel;
+  cutoffTimeMinutes: number;
+  lastFinisherTimeMinutes: number;
+  medianFinisherTimeMinutes: number;
+  aidStationsCount: number;
+  priceEur: number;
+  description: string;
+  tags: string[];
+  sourceUrl?: string;
   isCancelled: boolean;
   createdAt: string;
   updatedAt: string;
@@ -41,17 +54,39 @@ export interface RaceFiltersDto {
 export interface CreateRaceDto {
   name: string;
   location: string;
+  region: string;
   date: IsoDateString;
   distanceKm: number;
   elevationGainM: number;
+  terrainType: TerrainType;
+  technicalityLevel: TechnicalityLevel;
+  cutoffTimeMinutes: number;
+  lastFinisherTimeMinutes: number;
+  medianFinisherTimeMinutes: number;
+  aidStationsCount: number;
+  priceEur: number;
+  description: string;
+  tags: string[];
+  sourceUrl?: string;
 }
 
 export interface UpdateRaceDto {
   name?: string;
   location?: string;
+  region?: string;
   date?: IsoDateString;
   distanceKm?: number;
   elevationGainM?: number;
+  terrainType?: TerrainType;
+  technicalityLevel?: TechnicalityLevel;
+  cutoffTimeMinutes?: number;
+  lastFinisherTimeMinutes?: number;
+  medianFinisherTimeMinutes?: number;
+  aidStationsCount?: number;
+  priceEur?: number;
+  description?: string;
+  tags?: string[];
+  sourceUrl?: string;
   isCancelled?: boolean;
 }
 
