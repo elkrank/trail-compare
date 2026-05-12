@@ -59,29 +59,37 @@ const parseTags = (value: string) => value.split(',').map((tag) => tag.trim()).f
 export function AdminRaceForm({ initial, onSubmit }: { initial?: RaceDto; onSubmit: (v: CreateRaceDto | UpdateRaceDto) => Promise<void> }) {
   const [form, setForm] = useState<RaceFormState>(() => toInitialFormState(initial));
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const buildPayload = (): CreateRaceDto => {
     const payload: CreateRaceDto = {
       name: form.name,
       location: form.location,
       region: form.region,
       date: form.date as CreateRaceDto['date'],
-      distanceKm: form.distanceKm,
-      elevationGainM: form.elevationGainM,
+      distanceKm: Number(form.distanceKm),
+      elevationGainM: Number(form.elevationGainM),
       terrainType: form.terrainType,
       technicalityLevel: form.technicalityLevel,
-      cutoffTimeMinutes: form.cutoffTimeMinutes,
-      lastFinisherTimeMinutes: form.lastFinisherTimeMinutes,
-      medianFinisherTimeMinutes: form.medianFinisherTimeMinutes,
-      aidStationsCount: form.aidStationsCount,
-      priceEur: form.priceEur,
+      cutoffTimeMinutes: Number(form.cutoffTimeMinutes),
+      lastFinisherTimeMinutes: Number(form.lastFinisherTimeMinutes),
+      medianFinisherTimeMinutes: Number(form.medianFinisherTimeMinutes),
+      aidStationsCount: Number(form.aidStationsCount),
+      priceEur: Number(form.priceEur),
       description: form.description,
       tags: parseTags(form.tagsInput),
-      sourceUrl: form.sourceUrl.trim() || undefined,
     };
 
-    await onSubmit(payload);
+    const sourceUrl = form.sourceUrl.trim();
+    if (sourceUrl) {
+      payload.sourceUrl = sourceUrl;
+    }
+
+    return payload;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    await onSubmit(buildPayload());
   };
 
   return <form onSubmit={handleSubmit} className="state-card fade-in-up" style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
