@@ -35,6 +35,13 @@ interface RaceFormState {
   sourceUrl: string;
 }
 
+interface AdminRaceFormProps {
+  initial?: RaceDto;
+  onSubmit: (v: CreateRaceDto | UpdateRaceDto) => Promise<void>;
+  fieldErrors?: Partial<Record<keyof CreateRaceDto, string>>;
+  globalError?: string;
+}
+
 const toInitialFormState = (initial?: RaceDto): RaceFormState => ({
   name: initial?.name ?? '',
   location: initial?.location ?? '',
@@ -56,7 +63,23 @@ const toInitialFormState = (initial?: RaceDto): RaceFormState => ({
 
 const parseTags = (value: string) => value.split(',').map((tag) => tag.trim()).filter(Boolean);
 
-export function AdminRaceForm({ initial, onSubmit }: { initial?: RaceDto; onSubmit: (v: CreateRaceDto | UpdateRaceDto) => Promise<void> }) {
+const fieldErrorStyle: React.CSSProperties = {
+  color: '#b91c1c',
+  fontSize: '0.85rem',
+  marginTop: '0.25rem',
+};
+
+const globalErrorStyle: React.CSSProperties = {
+  color: '#b91c1c',
+  fontWeight: 700,
+  margin: 0,
+};
+
+function FieldError({ message }: { message?: string }) {
+  return message ? <span style={fieldErrorStyle} role="alert">{message}</span> : null;
+}
+
+export function AdminRaceForm({ initial, onSubmit, fieldErrors = {}, globalError }: AdminRaceFormProps) {
   const [form, setForm] = useState<RaceFormState>(() => toInitialFormState(initial));
 
   const buildPayload = (): CreateRaceDto => {
@@ -94,26 +117,27 @@ export function AdminRaceForm({ initial, onSubmit }: { initial?: RaceDto; onSubm
 
   return <form onSubmit={handleSubmit} className="state-card fade-in-up" style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
     <h3 style={{ marginBottom: 0 }}>{initial ? 'Modifier la course' : 'Créer une course'}</h3>
-    <label>Nom<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nom de la course" required /></label>
-    <label>Lieu<input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Ville ou lieu" required /></label>
-    <label>Région<input value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} placeholder="Région" required /></label>
-    <label>Date<input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required /></label>
-    <label>Distance (km)<input type="number" min="0" step="0.1" value={form.distanceKm} onChange={(e) => setForm({ ...form, distanceKm: Number(e.target.value) })} required /></label>
-    <label>Dénivelé positif (m)<input type="number" min="0" value={form.elevationGainM} onChange={(e) => setForm({ ...form, elevationGainM: Number(e.target.value) })} required /></label>
+    {globalError ? <p style={globalErrorStyle} role="alert">{globalError}</p> : null}
+    <label>Nom<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nom de la course" required /><FieldError message={fieldErrors.name} /></label>
+    <label>Lieu<input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Ville ou lieu" required /><FieldError message={fieldErrors.location} /></label>
+    <label>Région<input value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} placeholder="Région" required /><FieldError message={fieldErrors.region} /></label>
+    <label>Date<input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required /><FieldError message={fieldErrors.date} /></label>
+    <label>Distance (km)<input type="number" min="0" step="0.1" value={form.distanceKm} onChange={(e) => setForm({ ...form, distanceKm: Number(e.target.value) })} required /><FieldError message={fieldErrors.distanceKm} /></label>
+    <label>Dénivelé positif (m)<input type="number" min="0" value={form.elevationGainM} onChange={(e) => setForm({ ...form, elevationGainM: Number(e.target.value) })} required /><FieldError message={fieldErrors.elevationGainM} /></label>
     <label>Terrain<select value={form.terrainType} onChange={(e) => setForm({ ...form, terrainType: e.target.value as TerrainType })} required>
       {TERRAIN_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-    </select></label>
+    </select><FieldError message={fieldErrors.terrainType} /></label>
     <label>Technicité<select value={form.technicalityLevel} onChange={(e) => setForm({ ...form, technicalityLevel: e.target.value as TechnicalityLevel })} required>
       {TECHNICALITY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-    </select></label>
-    <label>Temps limite (minutes)<input type="number" min="0" value={form.cutoffTimeMinutes} onChange={(e) => setForm({ ...form, cutoffTimeMinutes: Number(e.target.value) })} required /></label>
-    <label>Temps dernier finisher (minutes)<input type="number" min="0" value={form.lastFinisherTimeMinutes} onChange={(e) => setForm({ ...form, lastFinisherTimeMinutes: Number(e.target.value) })} required /></label>
-    <label>Temps médian finisher (minutes)<input type="number" min="0" value={form.medianFinisherTimeMinutes} onChange={(e) => setForm({ ...form, medianFinisherTimeMinutes: Number(e.target.value) })} required /></label>
-    <label>Nombre de ravitaillements<input type="number" min="0" value={form.aidStationsCount} onChange={(e) => setForm({ ...form, aidStationsCount: Number(e.target.value) })} required /></label>
-    <label>Prix (€)<input type="number" min="0" step="0.01" value={form.priceEur} onChange={(e) => setForm({ ...form, priceEur: Number(e.target.value) })} required /></label>
-    <label>Description<textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description de la course" required /></label>
-    <label>Tags<input value={form.tagsInput} onChange={(e) => setForm({ ...form, tagsInput: e.target.value })} placeholder="Ultra, Technique, Nocturne" required /></label>
-    <label>URL source (optionnel)<input type="url" value={form.sourceUrl} onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })} placeholder="https://..." /></label>
+    </select><FieldError message={fieldErrors.technicalityLevel} /></label>
+    <label>Temps limite (minutes)<input type="number" min="0" value={form.cutoffTimeMinutes} onChange={(e) => setForm({ ...form, cutoffTimeMinutes: Number(e.target.value) })} required /><FieldError message={fieldErrors.cutoffTimeMinutes} /></label>
+    <label>Temps dernier finisher (minutes)<input type="number" min="0" value={form.lastFinisherTimeMinutes} onChange={(e) => setForm({ ...form, lastFinisherTimeMinutes: Number(e.target.value) })} required /><FieldError message={fieldErrors.lastFinisherTimeMinutes} /></label>
+    <label>Temps médian finisher (minutes)<input type="number" min="0" value={form.medianFinisherTimeMinutes} onChange={(e) => setForm({ ...form, medianFinisherTimeMinutes: Number(e.target.value) })} required /><FieldError message={fieldErrors.medianFinisherTimeMinutes} /></label>
+    <label>Nombre de ravitaillements<input type="number" min="0" value={form.aidStationsCount} onChange={(e) => setForm({ ...form, aidStationsCount: Number(e.target.value) })} required /><FieldError message={fieldErrors.aidStationsCount} /></label>
+    <label>Prix (€)<input type="number" min="0" step="0.01" value={form.priceEur} onChange={(e) => setForm({ ...form, priceEur: Number(e.target.value) })} required /><FieldError message={fieldErrors.priceEur} /></label>
+    <label>Description<textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description de la course" required /><FieldError message={fieldErrors.description} /></label>
+    <label>Tags<input value={form.tagsInput} onChange={(e) => setForm({ ...form, tagsInput: e.target.value })} placeholder="Ultra, Technique, Nocturne" required /><FieldError message={fieldErrors.tags} /></label>
+    <label>URL source (optionnel)<input type="url" value={form.sourceUrl} onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })} placeholder="https://..." /><FieldError message={fieldErrors.sourceUrl} /></label>
     <button type="submit">Enregistrer</button>
   </form>;
 }
