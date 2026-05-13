@@ -90,7 +90,22 @@ export interface UpdateRaceDto {
   isCancelled?: boolean;
 }
 
-export interface AdminLoginRequestDto { username: string; password: string; }
-export interface AdminLoginResponseDto { accessToken: string; refreshToken: string; tokenType: 'Bearer'; expiresIn: number; }
-export interface AdminRefreshRequestDto { refreshToken: string; }
-export interface AdminRefreshResponseDto { accessToken: string; refreshToken: string; tokenType: 'Bearer'; expiresIn: number; }
+export interface AdminLoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface AdminRefreshRequest {
+  refreshToken: string;
+}
+
+export interface AdminTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: 'Bearer';
+}
+
+export interface ApiErrorResponse {
+  message?: string;
+  details?: unknown;
+}

@@ -11,7 +11,7 @@ describe('admin-auth.service', () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ accessToken: 'a1', refreshToken: 'r1', tokenType: 'Bearer', expiresIn: 3600 }),
+      json: async () => ({ accessToken: 'a1', refreshToken: 'r1', tokenType: 'Bearer' }),
     } as Response);
 
     const result = await adminLogin({ username: 'admin', password: 'pwd' });
@@ -27,7 +27,7 @@ describe('admin-auth.service', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ accessToken: 'a2', refreshToken: 'r2', tokenType: 'Bearer', expiresIn: 3600 }),
+      json: async () => ({ accessToken: 'a2', refreshToken: 'r2', tokenType: 'Bearer' }),
     } as Response);
 
     const result = await adminRefresh({ refreshToken: 'r1' });
