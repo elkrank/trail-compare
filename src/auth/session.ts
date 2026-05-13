@@ -1,7 +1,6 @@
 import type {
-  AdminLoginRequestDto,
-  AdminLoginResponseDto,
-  AdminRefreshResponseDto,
+  AdminLoginRequest,
+  AdminTokenResponse,
 } from '../api/types';
 import {
   clearAllTokens,
@@ -72,19 +71,19 @@ function persistTokens(accessToken: string, refreshToken: string): void {
   notifySessionChange();
 }
 
-export async function loginAdmin(payload: AdminLoginRequestDto): Promise<AdminLoginResponseDto> {
-  const response = await postJson<AdminLoginResponseDto>('/api/admin/auth/login', payload);
+export async function loginAdmin(payload: AdminLoginRequest): Promise<AdminTokenResponse> {
+  const response = await postJson<AdminTokenResponse>('/api/admin/auth/login', payload);
   persistTokens(response.accessToken, response.refreshToken);
   return response;
 }
 
-export async function refreshAdminSession(): Promise<AdminRefreshResponseDto> {
+export async function refreshAdminSession(): Promise<AdminTokenResponse> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) {
     throw new Error('No refresh token available.');
   }
 
-  const response = await postJson<AdminRefreshResponseDto>('/api/admin/auth/refresh', { refreshToken });
+  const response = await postJson<AdminTokenResponse>('/api/admin/auth/refresh', { refreshToken });
   persistTokens(response.accessToken, response.refreshToken);
   return response;
 }

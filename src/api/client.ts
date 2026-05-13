@@ -1,6 +1,7 @@
 import { clearAllTokens, getAccessToken, getRefreshToken, setAccessToken, setRefreshToken } from '../auth/token-storage';
 import { fromHttpError, normalizeApiError } from './errors';
 import { serializeQueryParams, type QueryParams } from './query';
+import type { AdminTokenResponse, ApiErrorResponse } from './types';
 
 const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL as string | undefined;
 
@@ -17,11 +18,6 @@ interface RequestOptions {
   query?: QueryParams;
   headers?: Record<string, string>;
   retried?: boolean;
-}
-
-interface RefreshResponse {
-  accessToken: string;
-  refreshToken: string;
 }
 
 let refreshPromise: Promise<string> | null = null;
@@ -51,7 +47,7 @@ async function refreshAccessTokenShared(): Promise<string> {
       throw new Error(`Refresh failed with status ${response.status}`);
     }
 
-    const payload = (await response.json()) as RefreshResponse;
+    const payload = (await response.json()) as AdminTokenResponse;
     setAccessToken(payload.accessToken);
     setRefreshToken(payload.refreshToken);
     return payload.accessToken;
@@ -107,7 +103,7 @@ export async function apiRequest<TResponse>(
       }
 
       const message =
-        (payload as { message?: string } | undefined)?.message ??
+        (payload as ApiErrorResponse | undefined)?.message ??
         `Request failed with status ${response.status}`;
 
       throw fromHttpError(response.status, message, payload);
