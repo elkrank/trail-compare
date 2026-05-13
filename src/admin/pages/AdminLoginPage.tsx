@@ -1,29 +1,11 @@
 import React, { useState } from 'react';
-import { adminLogin } from '../../api/admin-auth.service';
+import { loginAdmin } from '../../api/admin-auth.service';
 import { AppApiError, normalizeApiError } from '../../api/errors';
 import { setAccessToken, setRefreshToken, setTokenType } from '../../auth/token-storage';
 import { useRouter } from '../../router/AppRouter';
 import { InlineError } from '../../shared/components/AsyncStates';
 
 const EMPTY_FIELDS_MESSAGE = 'Veuillez remplir tous les champs.';
-const LOGIN_ERROR_MESSAGES: Record<number, string> = {
-  400: EMPTY_FIELDS_MESSAGE,
-  401: 'Identifiants invalides.',
-  429: 'Trop de tentatives de connexion. Réessayez dans une minute.',
-};
-const FALLBACK_LOGIN_ERROR_MESSAGE = 'Impossible de se connecter pour le moment. Réessayez plus tard.';
-
-function buildLoginError(error: AppApiError): AppApiError {
-  const userMessage = error.status ? LOGIN_ERROR_MESSAGES[error.status] : undefined;
-
-  return new AppApiError({
-    code: error.code,
-    status: error.status,
-    userMessage: userMessage ?? FALLBACK_LOGIN_ERROR_MESSAGE,
-    technicalMessage: error.technicalMessage,
-    details: error.details,
-  });
-}
 
 export function AdminLoginPage() {
   const [username, setUsername] = useState('');
@@ -49,13 +31,13 @@ export function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await adminLogin({ username: username.trim(), password });
+      const res = await loginAdmin(username.trim(), password);
       setAccessToken(res.accessToken);
       setRefreshToken(res.refreshToken);
       setTokenType(res.tokenType);
       navigate('/admin/races');
     } catch (err: unknown) {
-      setError(buildLoginError(normalizeApiError(err)));
+      setError(normalizeApiError(err));
     } finally {
       setIsLoading(false);
     }
