@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createAdminRace, deleteAdminRace, patchAdminRace, updateAdminRace } from '../../api/admin-races.service';
 import { getRaces } from '../../api/races.service';
 import type { CreateRaceDto, RaceDto, UpdateRaceDto } from '../../api/types';
+import { getAdminSessionState, logoutAdmin, subscribeToAdminSession } from '../../auth/session';
 import { AdminRaceForm } from '../components/AdminRaceForm';
 import { AppApiError, normalizeApiError } from '../../api/errors';
 import { ErrorState, InlineError, LoadingState } from '../../shared/components/AsyncStates';
@@ -95,15 +96,44 @@ export function AdminRacesPage() {
   const [actionError, setActionError] = useState<AppApiError | null>(null);
   const [createFieldErrors, setCreateFieldErrors] = useState<RaceFieldErrors>({});
   const [editFieldErrors, setEditFieldErrors] = useState<RaceFieldErrors>({});
+  const [isAuthenticated, setIsAuthenticated] = useState(() => getAdminSessionState().isAuthenticated);
+
+  const handleLogout = () => {
+    logoutAdmin();
+  };
 
   const load = async () => {
+    if (!getAdminSessionState().isAuthenticated) {
+      logoutAdmin();
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try { const data = await getRaces({ page: 0, size: 100 }); setRaces(data.items); } catch (err: unknown) { setError(normalizeApiError(err)); } finally { setLoading(false); }
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const unsubscribe = subscribeToAdminSession((state) => {
+      setIsAuthenticated(state.isAuthenticated);
+      if (!state.isAuthenticated) {
+        logoutAdmin();
+      }
+    });
 
-  return <div className="fade-in-up"><h1>Admin races</h1>
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      load();
+    }
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return <div className="fade-in-up"><div className="admin-actions" style={{ justifyContent: 'space-between', alignItems: 'center' }}><h1>Admin races</h1><button type="button" onClick={handleLogout}>Déconnexion</button></div>
     {actionError ? <InlineError error={actionError} /> : null}
     {loading ? <LoadingState /> : null}
     {!loading && error ? <ErrorState error={error} onRetry={load} showAdminRelogin={error.code === 'UNAUTHORIZED'} /> : null}
