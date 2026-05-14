@@ -88,7 +88,26 @@ export async function refreshAdminSession(): Promise<AdminTokenResponse> {
   return response;
 }
 
+function redirectToAdminLogin(): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (window.location.pathname !== '/admin/login') {
+    window.history.pushState({}, '', '/admin/login');
+  }
+
+  window.dispatchEvent(new Event('popstate'));
+}
+
 export function logoutAdmin(): void {
+  const wasAuthenticated = getState().isAuthenticated;
+
   clearAllTokens();
-  notifySessionChange();
+
+  if (wasAuthenticated) {
+    notifySessionChange();
+  }
+
+  redirectToAdminLogin();
 }
