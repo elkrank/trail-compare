@@ -70,6 +70,10 @@ export interface CreateRaceDto {
   sourceUrl?: string;
 }
 
+export interface CreateRaceWithGpxPayload extends CreateRaceDto {
+  gpxFile?: File;
+}
+
 export interface UpdateRaceDto {
   name?: string;
   location?: string;
