@@ -1,25 +1,40 @@
-import type { RaceDto } from '../api/types';
-import type { Race, RunnerProfile } from './types';
+import type { RaceDto, TechnicalityLevel as ApiTechnicalityLevel, TerrainType as ApiTerrainType } from '../api/types';
+import type { Race, RaceTechnicalityLevel, RunnerProfile, TerrainType } from './types';
 
 const TECH_WEIGHT = { facile: 0.2, moderee: 0.45, technique: 0.7, 'tres-technique': 1 } as const;
 const TERRAIN_WEIGHT = { route: 0.1, mixte: 0.35, sentier: 0.55, montagne: 0.9 } as const;
 const PROFILE_KEY = 'trailmatch.runnerProfile';
 
+const TERRAIN_TYPE_MAP: Record<ApiTerrainType, TerrainType> = {
+  MOUNTAIN: 'montagne',
+  FOREST: 'sentier',
+  MIXED: 'mixte',
+  ROAD: 'route',
+  DESERT: 'sentier',
+};
+
+const TECHNICALITY_LEVEL_MAP: Record<ApiTechnicalityLevel, RaceTechnicalityLevel> = {
+  EASY: 'facile',
+  MODERATE: 'moderee',
+  HARD: 'technique',
+  EXTREME: 'tres-technique',
+};
+
 export function toRace(dto: RaceDto): Race {
-  const ratio = Number((dto.elevationGainM / Math.max(dto.distanceKm, 1)).toFixed(1));
   return {
     ...dto,
-    region: dto.location,
-    elevationPerKm: ratio,
-    terrainType: ratio > 55 ? 'montagne' : ratio > 30 ? 'sentier' : 'mixte',
-    technicalityLevel: ratio > 65 ? 'tres-technique' : ratio > 40 ? 'technique' : ratio > 20 ? 'moderee' : 'facile',
-    cutoffTimeMinutes: Math.round(dto.distanceKm * (ratio > 40 ? 13 : 10)),
-    lastFinisherTimeMinutes: Math.round(dto.distanceKm * (ratio > 40 ? 12.1 : 9.2)),
-    medianFinisherTimeMinutes: Math.round(dto.distanceKm * (ratio > 40 ? 9.8 : 7.5)),
-    aidStationsCount: Math.max(1, Math.round(dto.distanceKm / 18)),
-    priceEur: dto.distanceKm > 60 ? 90 : dto.distanceKm > 30 ? 55 : 35,
-    description: `Parcours ${dto.name} avec profil ${ratio} m D+/km.`,
-    tags: [ratio > 50 ? 'montagne' : 'roulant', dto.distanceKm > 42 ? 'longue-distance' : 'format-court'],
+    region: dto.region,
+    elevationPerKm: Number((dto.elevationGainM / Math.max(dto.distanceKm, 1)).toFixed(1)),
+    terrainType: TERRAIN_TYPE_MAP[dto.terrainType],
+    technicalityLevel: TECHNICALITY_LEVEL_MAP[dto.technicalityLevel],
+    cutoffTimeMinutes: dto.cutoffTimeMinutes,
+    lastFinisherTimeMinutes: dto.lastFinisherTimeMinutes,
+    medianFinisherTimeMinutes: dto.medianFinisherTimeMinutes,
+    aidStationsCount: dto.aidStationsCount,
+    priceEur: dto.priceEur,
+    description: dto.description,
+    tags: dto.tags,
+    sourceUrl: dto.sourceUrl,
   };
 }
 
