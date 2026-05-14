@@ -20,6 +20,10 @@ interface RequestOptions {
   retried?: boolean;
 }
 
+function isFormDataBody(body: unknown): body is FormData {
+  return typeof FormData !== 'undefined' && body instanceof FormData;
+}
+
 let refreshPromise: Promise<string> | null = null;
 
 function isAdminApiPath(path: string): boolean {
@@ -65,9 +69,10 @@ export async function apiRequest<TResponse>(
   options: RequestOptions = {},
 ): Promise<TResponse> {
   const { method = 'GET', body, query, headers = {}, retried = false } = options;
+  const isFormData = isFormDataBody(body);
 
   const computedHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...headers,
   };
 
@@ -82,7 +87,7 @@ export async function apiRequest<TResponse>(
     const response = await fetch(`${BACKEND_BASE_URL ?? ''}${path}${serializeQueryParams(query)}`, {
       method,
       headers: computedHeaders,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
     });
 
     if (response.status === 401 && isAdminApiPath(path) && !retried && path !== '/api/admin/auth/refresh') {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createAdminRace, deleteAdminRace, patchAdminRace, updateAdminRace } from '../../api/admin-races.service';
 import { getRaces } from '../../api/races.service';
-import type { CreateRaceDto, RaceDto, UpdateRaceDto } from '../../api/types';
+import type { CreateRaceDto, CreateRaceWithGpxPayload, RaceDto, UpdateRaceDto } from '../../api/types';
 import { getAdminSessionState, logoutAdmin, subscribeToAdminSession } from '../../auth/session';
 import { AdminRaceForm } from '../components/AdminRaceForm';
 import { AppApiError, normalizeApiError } from '../../api/errors';
@@ -137,7 +137,7 @@ export function AdminRacesPage() {
     {actionError ? <InlineError error={actionError} /> : null}
     {loading ? <LoadingState /> : null}
     {!loading && error ? <ErrorState error={error} onRetry={load} showAdminRelogin={error.code === 'UNAUTHORIZED'} /> : null}
-    {!error ? <AdminRaceForm fieldErrors={createFieldErrors} globalError={Object.keys(createFieldErrors).length > 0 ? VALIDATION_GLOBAL_ERROR : undefined} onSubmit={async (v) => { try { setActionError(null); setCreateFieldErrors({}); await createAdminRace(v as CreateRaceDto); await load(); } catch (err: unknown) { const normalizedError = normalizeApiError(err); const fieldErrors = extractValidationFieldErrors(normalizedError); if (fieldErrors) { setCreateFieldErrors(fieldErrors); } else { setActionError(normalizedError); } } }} /> : null}
+    {!error ? <AdminRaceForm fieldErrors={createFieldErrors} globalError={Object.keys(createFieldErrors).length > 0 ? VALIDATION_GLOBAL_ERROR : undefined} onSubmit={async (v) => { try { setActionError(null); setCreateFieldErrors({}); await createAdminRace(v as CreateRaceWithGpxPayload); await load(); } catch (err: unknown) { const normalizedError = normalizeApiError(err); const fieldErrors = extractValidationFieldErrors(normalizedError); if (fieldErrors) { setCreateFieldErrors(fieldErrors); } else { setActionError(normalizedError); } } }} /> : null}
     {!error ? <ul className="admin-list">{races.map((race) => <li className="admin-item" key={race.id}><div><strong>{race.name}</strong><div className="muted">{race.location} • {race.date} • {race.distanceKm} km</div></div>
       <div className="admin-actions"><button onClick={async () => { try { setActionError(null); await patchAdminRace(race.id, { isCancelled: !race.isCancelled }); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }}>{race.isCancelled ? 'Réactiver' : 'Annuler'}</button>
       <button onClick={() => { setEditFieldErrors({}); setEditing(race); }}>Edit</button>

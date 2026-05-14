@@ -1,17 +1,35 @@
 import { apiRequest } from './client';
-import type { CreateRaceDto, RaceDto, UpdateRaceDto } from './types';
+import type { CreateRaceWithGpxPayload, RaceDto, UpdateRaceDto } from './types';
 
 interface AdminRequestOptions {
   accessToken?: string;
 }
 
+const MULTIPART_RACE_PART_NAME = 'race';
+const MULTIPART_GPX_FILE_PART_NAME = 'gpxFile';
+
+function toMultipartCreateRacePayload(payload: CreateRaceWithGpxPayload & { gpxFile: File }): FormData {
+  const { gpxFile, ...race } = payload;
+  const formData = new FormData();
+  formData.append(
+    MULTIPART_RACE_PART_NAME,
+    new Blob([JSON.stringify(race)], { type: 'application/json' }),
+  );
+  formData.append(MULTIPART_GPX_FILE_PART_NAME, gpxFile);
+  return formData;
+}
+
 export function createAdminRace(
-  payload: CreateRaceDto,
+  payload: CreateRaceWithGpxPayload,
   _options?: AdminRequestOptions,
 ): Promise<RaceDto> {
+  const body = payload.gpxFile
+    ? toMultipartCreateRacePayload({ ...payload, gpxFile: payload.gpxFile })
+    : payload;
+
   return apiRequest<RaceDto>('/api/admin/races', {
     method: 'POST',
-    body: payload,
+    body,
   });
 }
 
