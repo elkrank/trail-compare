@@ -87,3 +87,420 @@ button { cursor:pointer; }
   .compare-card-facts div { grid-template-columns: 1fr; gap: .2rem; }
   .compare-selection-header { align-items: flex-start; flex-direction: column; }
 }
+
+.courses-page {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 3rem;
+  color: #102017;
+}
+
+.courses-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #e4dccd;
+  border-radius: 1.8rem;
+  margin-bottom: 1.15rem;
+  padding: clamp(2rem, 5vw, 4.6rem);
+  background-color: #fbfaf4;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='760' height='360' viewBox='0 0 760 360' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23102017' stroke-width='1.2' opacity='.16'%3E%3Cpath d='M-20 74 C76 12 142 132 232 70 S398 18 496 82 654 146 790 54'/%3E%3Cpath d='M-20 120 C88 52 154 174 244 112 S408 60 508 126 662 186 790 98'/%3E%3Cpath d='M-20 168 C98 96 166 218 260 154 S426 106 526 172 676 226 790 144'/%3E%3Cpath d='M-20 216 C108 142 184 262 278 200 S446 154 546 220 692 270 790 192'/%3E%3Cpath d='M-20 268 C116 194 198 310 302 248 S466 204 568 268 704 316 790 244'/%3E%3Cpath d='M-20 318 C122 246 216 352 326 300 S488 256 590 318 718 360 790 302'/%3E%3C/g%3E%3Cg fill='%231f5f22' opacity='.12'%3E%3Cpath d='M438 250 530 108l84 142z'/%3E%3Cpath d='M536 250 646 82l118 168z'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(circle at 82% 12%, rgba(235,119,36,.2), transparent 28%),
+    linear-gradient(135deg, #fffdf7 0%, #fbfaf4 55%, #eff6ed 100%);
+  background-position: right bottom, center, center;
+  background-repeat: no-repeat;
+  box-shadow: 0 22px 55px rgba(16, 32, 23, .09);
+}
+
+.courses-hero::after {
+  content: "";
+  position: absolute;
+  right: clamp(1rem, 5vw, 4rem);
+  bottom: 0;
+  width: min(38%, 390px);
+  height: 54%;
+  background: linear-gradient(135deg, transparent 48%, rgba(16,32,23,.16) 49% 51%, transparent 52%), linear-gradient(40deg, transparent 46%, rgba(31,95,34,.18) 47% 50%, transparent 51%);
+  clip-path: polygon(0 100%, 29% 42%, 45% 68%, 65% 18%, 100% 100%);
+  opacity: .7;
+  pointer-events: none;
+}
+
+.courses-hero-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 690px;
+}
+
+.courses-hero-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 3.1rem;
+  height: 3.1rem;
+  margin-bottom: .85rem;
+  border-radius: 1rem;
+  background: #102017;
+  color: #fbfaf4;
+  box-shadow: 0 14px 24px rgba(16, 32, 23, .18);
+}
+
+.courses-eyebrow {
+  margin: 0 0 .35rem;
+  color: #1f5f22;
+  font-size: .83rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.courses-hero h1 {
+  max-width: 650px;
+  margin: 0;
+  color: #102017;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.45rem, 6vw, 5rem);
+  line-height: .98;
+  letter-spacing: -.045em;
+}
+
+.courses-hero-subtitle {
+  max-width: 600px;
+  margin: 1rem 0 0;
+  color: #435247;
+  font-size: clamp(1rem, 2vw, 1.18rem);
+  line-height: 1.65;
+}
+
+.courses-quick-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin: 1.2rem 0 .85rem;
+}
+
+.quick-filter-chip {
+  border-color: #d8dfd3;
+  border-radius: 999px;
+  background: #fff;
+  color: #102017;
+  font-weight: 800;
+  padding: .72rem 1.05rem;
+  box-shadow: 0 8px 18px rgba(16, 32, 23, .05);
+}
+
+.quick-filter-chip:hover,
+.quick-filter-chip:focus-visible {
+  border-color: rgba(31, 95, 34, .38);
+  background: #f1f7ee;
+}
+
+.quick-filter-chip--add {
+  width: 2.85rem;
+  padding-inline: 0;
+  background: #102017;
+  color: #fff;
+  border-color: #102017;
+}
+
+.courses-filter-bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .8rem;
+  margin-bottom: .95rem;
+  border: 1px solid #e1e3d9;
+  border-radius: 1.15rem;
+  background: rgba(255,255,255,.88);
+  padding: .75rem;
+  box-shadow: 0 15px 36px rgba(16, 32, 23, .08);
+}
+
+.advanced-filter-button,
+.reset-filter-button {
+  font-weight: 800;
+}
+
+.advanced-filter-button {
+  background: #102017;
+  color: #fff;
+  border-color: #102017;
+}
+
+.reset-filter-button {
+  background: #fff7ef;
+  color: #a94b09;
+  border-color: rgba(235,119,36,.28);
+}
+
+.active-filter-summary {
+  min-width: 0;
+  color: #58675c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.courses-advanced-filters {
+  margin: 0 0 1rem;
+  border: 1px solid #e5e4dc;
+  border-radius: 1rem;
+  background: #ffffff;
+  padding: 1rem;
+  box-shadow: 0 12px 28px rgba(16,32,23,.05);
+}
+
+.courses-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.35rem 0 1rem;
+}
+
+.courses-toolbar p {
+  margin: 0;
+  color: #314036;
+  font-size: 1.05rem;
+}
+
+.courses-toolbar strong {
+  color: #102017;
+}
+
+.courses-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  color: #536257;
+  font-weight: 700;
+}
+
+.courses-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.15rem;
+}
+
+.courses-card-grid .race-card {
+  min-width: 0;
+}
+
+.race-card {
+  position: relative;
+  overflow: hidden;
+  background: #fffefb;
+  border: 1px solid #e1dfd3;
+  border-radius: 1.35rem;
+  padding: 1.05rem;
+  box-shadow: 0 18px 34px rgba(16,32,23,.09);
+}
+
+.race-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, #1f5f22, #eb7724);
+}
+
+.race-card-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .8rem;
+}
+
+.status-badge {
+  display: inline-flex;
+  border: 1px solid rgba(31,95,34,.18);
+  border-radius: 999px;
+  background: #eef6eb;
+  color: #1f5f22;
+  padding: .27rem .64rem;
+  font-size: .75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.difficulty-score {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 4.55rem;
+  height: 4.55rem;
+  border: 3px solid rgba(235,119,36,.23);
+  border-radius: 50%;
+  background: #fff8f1;
+  color: #102017;
+  line-height: 1;
+  box-shadow: inset 0 0 0 4px #fff;
+}
+
+.difficulty-score strong {
+  font-size: 1.35rem;
+}
+
+.difficulty-score span,
+.difficulty-score small {
+  font-size: .66rem;
+  color: #a95819;
+  font-weight: 800;
+}
+
+.race-card h3 {
+  margin: .85rem 0 .75rem;
+  color: #102017;
+  font-size: 1.3rem;
+  line-height: 1.15;
+}
+
+.race-altitude-profile {
+  width: 100%;
+  height: 74px;
+  margin: .15rem 0 .9rem;
+  border-radius: .9rem;
+  background: linear-gradient(180deg, #f8fbf5, #fffaf2);
+  border: 1px solid #edf0e7;
+}
+
+.race-altitude-fill {
+  fill: rgba(31,95,34,.13);
+}
+
+.race-altitude-line {
+  fill: none;
+  stroke: #1f5f22;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.race-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .55rem;
+  margin-bottom: .85rem;
+}
+
+.race-card-metrics div {
+  min-width: 0;
+  border: 1px solid #ebece3;
+  border-radius: .9rem;
+  background: #fbfaf4;
+  padding: .7rem .55rem;
+}
+
+.race-card-metrics strong,
+.race-card-metrics span {
+  display: block;
+}
+
+.race-card-metrics strong {
+  color: #102017;
+  font-size: 1.2rem;
+  overflow-wrap: anywhere;
+}
+
+.race-card-metrics span {
+  color: #5c685f;
+  font-size: .75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.race-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin: .55rem 0;
+}
+
+.race-card-badges .badge {
+  margin: 0;
+}
+
+.race-card-tags .badge {
+  background: #fff7ef;
+  border-color: rgba(235,119,36,.2);
+  color: #9b4b13;
+}
+
+.race-card-meta {
+  display: grid;
+  gap: .4rem;
+  margin: .9rem 0 1rem;
+  color: #405046;
+  font-size: .92rem;
+}
+
+.race-card-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.race-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .6rem;
+}
+
+.race-card-actions .primary-btn,
+.race-card-actions .secondary-btn {
+  width: 100%;
+  border-radius: .9rem;
+}
+
+.race-compare-button {
+  border-color: #eb7724;
+  background: #eb7724;
+  color: #fff;
+}
+
+.courses-compare-summary {
+  margin: 1rem 0 0;
+}
+
+@media (max-width: 980px) {
+  .courses-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .courses-hero::after {
+    width: 48%;
+    opacity: .38;
+  }
+}
+
+@media (max-width: 700px) {
+  .courses-page {
+    width: min(100% - 1rem, 1180px);
+    padding-top: 1rem;
+  }
+
+  .courses-hero {
+    min-height: auto;
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+  }
+
+  .courses-filter-bar,
+  .courses-toolbar,
+  .courses-toolbar label {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .active-filter-summary {
+    white-space: normal;
+  }
+
+  .courses-card-grid,
+  .race-card-actions {
+    grid-template-columns: 1fr;
+  }
+}
