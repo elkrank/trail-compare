@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getRaces } from '../races.service';
+import { getRaceGpx, getRaces } from '../races.service';
 import { AppApiError } from '../errors';
 
 describe('races.service', () => {
@@ -23,6 +23,26 @@ describe('races.service', () => {
     expect(String(url)).toContain('minDistance=20');
     expect(String(url)).toContain('page=2');
     expect(String(url)).toContain('size=5');
+  });
+
+  it('returns GPX text when a race GPX is available', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => '<gpx></gpx>',
+    } as Response);
+
+    await expect(getRaceGpx('race-1', '/files/race-1.gpx')).resolves.toBe('<gpx></gpx>');
+  });
+
+  it('returns null when a race GPX is missing', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 404,
+      text: async () => '',
+    } as Response);
+
+    await expect(getRaceGpx('race-1')).resolves.toBeNull();
   });
 
   it.each([401, 404, 500])('returns mapped error on HTTP %s', async (status) => {

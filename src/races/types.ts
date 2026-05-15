@@ -20,6 +20,9 @@ export interface Race {
   description: string;
   tags: string[];
   sourceUrl?: string;
+  gpxUrl?: string;
+  gpxFileUrl?: string;
+  hasGpx?: boolean;
   gradient?: string;
 }
 

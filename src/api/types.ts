@@ -20,6 +20,9 @@ export interface RaceDto {
   description: string;
   tags: string[];
   sourceUrl?: string;
+  gpxUrl?: string;
+  gpxFileUrl?: string;
+  hasGpx?: boolean;
   isCancelled: boolean;
   createdAt: string;
   updatedAt: string;

@@ -375,6 +375,14 @@ button { cursor:pointer; }
   stroke: #1f5f22;
   stroke-width: 4;
   stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.race-altitude-source {
+  fill: #1f5f22;
+  font-size: .48rem;
+  font-weight: 900;
+  letter-spacing: .08em;
 }
 
 .race-card-metrics {

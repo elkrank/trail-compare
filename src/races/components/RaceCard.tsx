@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from '../../router/AppRouter';
+import { getRaceGpx } from '../../api/races.service';
 import type { Race } from '../types';
 import { computeDifficultyScore } from '../services';
+import { buildElevationProfilePath, parseGpxElevationProfile, type ElevationProfilePoint } from '../gpx';
 
 function formatRaceDate(date: string): string {
   if (!date) return 'Date à confirmer';
@@ -10,16 +12,31 @@ function formatRaceDate(date: string): string {
   return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }).format(parsed);
 }
 
-function AltitudeProfile({ distanceKm, elevationGainM }: { distanceKm: number; elevationGainM: number }) {
+function fallbackProfilePath(distanceKm: number, elevationGainM: number): string {
   const distance = Math.max(distanceKm || 0, 1);
   const elevation = Math.max(elevationGainM || 0, 0);
   const peak = Math.min(46, 10 + (elevation / Math.max(distance, 1)) * 0.28);
   const middle = Math.max(12, peak * 0.55);
-  const path = `M4 54 C18 ${54 - middle}, 28 ${56 - peak}, 42 ${54 - peak} S70 ${42 - middle}, 92 18`;
+  return `M4 54 C18 ${54 - middle}, 28 ${56 - peak}, 42 ${54 - peak} S70 ${42 - middle}, 92 18`;
+}
 
-  return <svg className="race-altitude-profile" viewBox="0 0 96 60" role="img" aria-label="Mini profil d'altitude" focusable="false">
+function AltitudeProfile({
+  distanceKm,
+  elevationGainM,
+  profilePoints,
+}: {
+  distanceKm: number;
+  elevationGainM: number;
+  profilePoints?: ElevationProfilePoint[];
+}) {
+  const gpxPath = useMemo(() => profilePoints ? buildElevationProfilePath(profilePoints) : null, [profilePoints]);
+  const path = gpxPath ?? fallbackProfilePath(distanceKm, elevationGainM);
+  const sourceLabel = gpxPath ? 'depuis le GPX' : 'estimé';
+
+  return <svg className="race-altitude-profile" viewBox="0 0 96 60" role="img" aria-label={`Mini profil d'altitude ${sourceLabel}`} focusable="false">
     <path className="race-altitude-fill" d={`${path} L92 56 L4 56 Z`} />
     <path className="race-altitude-line" d={path} />
+    {gpxPath ? <text className="race-altitude-source" x="6" y="12">GPX</text> : null}
   </svg>;
 }
 
@@ -30,6 +47,25 @@ export function RaceCard({ race, onCompare }: { race: Race; onCompare?: (id: str
   const cutoffTimeMinutes = race.cutoffTimeMinutes || 0;
   const safeTags = race.tags ?? [];
   const elevationPerKm = Number.isFinite(race.elevationPerKm) ? race.elevationPerKm : elevationGainM / Math.max(distanceKm, 1);
+  const [gpxProfile, setGpxProfile] = useState<ElevationProfilePoint[] | undefined>();
+
+  useEffect(() => {
+    const gpxUrl = race.gpxUrl ?? race.gpxFileUrl;
+    const shouldLoadGpx = Boolean(gpxUrl || race.hasGpx);
+    let isMounted = true;
+
+    setGpxProfile(undefined);
+    if (!shouldLoadGpx) return undefined;
+
+    getRaceGpx(race.id, gpxUrl)
+      .then((gpxXml) => {
+        if (!isMounted || !gpxXml) return;
+        const profile = parseGpxElevationProfile(gpxXml);
+        if (profile.length > 1) setGpxProfile(profile);
+      });
+
+    return () => { isMounted = false; };
+  }, [race.gpxFileUrl, race.gpxUrl, race.hasGpx, race.id]);
 
   return <article className="race-card fade-in-up">
     <div className="race-card-topline">
@@ -39,7 +75,7 @@ export function RaceCard({ race, onCompare }: { race: Race; onCompare?: (id: str
       </div>
     </div>
     <h3>{race.name || 'Course à confirmer'}</h3>
-    <AltitudeProfile distanceKm={distanceKm} elevationGainM={elevationGainM} />
+    <AltitudeProfile distanceKm={distanceKm} elevationGainM={elevationGainM} profilePoints={gpxProfile} />
     <div className="race-card-metrics" aria-label="Métriques principales">
       <div><strong>{distanceKm}</strong><span>km</span></div>
       <div><strong>{elevationGainM}</strong><span>m D+</span></div>

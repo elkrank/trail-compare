@@ -5,6 +5,10 @@ import type { AdminTokenResponse, ApiErrorResponse } from './types';
 
 const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL as string | undefined;
 
+export function buildApiUrl(path: string): string {
+  return `${BACKEND_BASE_URL ?? ''}${path}`;
+}
+
 if (!BACKEND_BASE_URL) {
   // eslint-disable-next-line no-console
   console.warn('VITE_BACKEND_BASE_URL is not set. API calls will fail until configured.');
@@ -84,7 +88,7 @@ export async function apiRequest<TResponse>(
   }
 
   try {
-    const response = await fetch(`${BACKEND_BASE_URL ?? ''}${path}${serializeQueryParams(query)}`, {
+    const response = await fetch(`${buildApiUrl(path)}${serializeQueryParams(query)}`, {
       method,
       headers: computedHeaders,
       body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),

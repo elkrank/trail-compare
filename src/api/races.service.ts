@@ -1,4 +1,4 @@
-import { apiRequest } from './client';
+import { apiRequest, buildApiUrl } from './client';
 import type { RaceDto, RaceFiltersDto, RaceListResponseDto, SpringPageResponseDto } from './types';
 
 type RawRaceListResponseDto = RaceListResponseDto | SpringPageResponseDto<RaceDto>;
@@ -24,4 +24,23 @@ export function getRaceById(id: string): Promise<RaceDto> {
   return apiRequest<RaceDto>(`/api/races/${encodeURIComponent(id)}`, {
     method: 'GET',
   });
+}
+
+
+function resolveGpxUrl(raceId: string, gpxUrl?: string): string {
+  if (!gpxUrl) return buildApiUrl(`/api/races/${encodeURIComponent(raceId)}/gpx`);
+  if (/^https?:\/\//i.test(gpxUrl)) return gpxUrl;
+  return buildApiUrl(gpxUrl.startsWith('/') ? gpxUrl : `/${gpxUrl}`);
+}
+
+export function getRaceGpx(raceId: string, gpxUrl?: string): Promise<string | null> {
+  const url = resolveGpxUrl(raceId, gpxUrl);
+
+  return fetch(url, { method: 'GET', headers: { Accept: 'application/gpx+xml, application/xml, text/xml' } })
+    .then((response) => {
+      if (response.status === 404 || response.status === 204) return null;
+      if (!response.ok) return null;
+      return response.text();
+    })
+    .catch(() => null);
 }
