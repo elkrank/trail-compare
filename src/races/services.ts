@@ -35,6 +35,9 @@ export function toRace(dto: RaceDto): Race {
     description: dto.description,
     tags: dto.tags,
     sourceUrl: dto.sourceUrl,
+    gpxUrl: dto.gpxUrl,
+    gpxFileUrl: dto.gpxFileUrl,
+    hasGpx: dto.hasGpx,
   };
 }
 

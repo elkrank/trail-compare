@@ -20,6 +20,8 @@ const completeRaceDto: RaceDto = {
   description: 'Description fournie par l’API.',
   tags: ['api', 'preserve'],
   sourceUrl: 'https://example.test/races/race-1',
+  gpxUrl: 'https://example.test/races/race-1.gpx',
+  hasGpx: true,
   isCancelled: false,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-02T00:00:00.000Z',
@@ -44,6 +46,8 @@ describe('toRace', () => {
       priceEur: completeRaceDto.priceEur,
       description: completeRaceDto.description,
       sourceUrl: completeRaceDto.sourceUrl,
+      gpxUrl: completeRaceDto.gpxUrl,
+      hasGpx: completeRaceDto.hasGpx,
     });
     expect(race.tags).toBe(completeRaceDto.tags);
     expect(race.region).not.toBe(completeRaceDto.location);
