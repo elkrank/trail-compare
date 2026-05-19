@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { CreateRaceDto, CreateRaceWithGpxPayload, RaceDto, TechnicalityLevel, TerrainType, UpdateRaceDto } from '../../api/types';
+import type { CreateRaceDto, CreateRaceWithGpxPayload, RaceDto, TechnicalityLevel, TerrainType, UpdateRaceWithGpxPayload } from '../../api/types';
 
 const TERRAIN_OPTIONS: Array<{ value: TerrainType; label: string }> = [
   { value: 'MOUNTAIN', label: 'Montagne' },
@@ -38,7 +38,7 @@ interface RaceFormState {
 
 interface AdminRaceFormProps {
   initial?: RaceDto;
-  onSubmit: (v: CreateRaceWithGpxPayload | UpdateRaceDto) => Promise<void>;
+  onSubmit: (v: CreateRaceWithGpxPayload | UpdateRaceWithGpxPayload) => Promise<void>;
   fieldErrors?: Partial<Record<keyof CreateRaceDto, string>>;
   globalError?: string;
 }
@@ -84,7 +84,7 @@ function FieldError({ message }: { message?: string }) {
 export function AdminRaceForm({ initial, onSubmit, fieldErrors = {}, globalError }: AdminRaceFormProps) {
   const [form, setForm] = useState<RaceFormState>(() => toInitialFormState(initial));
 
-  const buildPayload = (): CreateRaceWithGpxPayload => {
+  const buildPayload = (): CreateRaceWithGpxPayload | UpdateRaceWithGpxPayload => {
     const payload: CreateRaceWithGpxPayload = {
       name: form.name,
       location: form.location,
@@ -108,7 +108,7 @@ export function AdminRaceForm({ initial, onSubmit, fieldErrors = {}, globalError
       payload.sourceUrl = sourceUrl;
     }
 
-    if (!initial && form.gpxFile) {
+    if (form.gpxFile) {
       payload.gpxFile = form.gpxFile;
     }
 
@@ -144,7 +144,7 @@ export function AdminRaceForm({ initial, onSubmit, fieldErrors = {}, globalError
     <label>Description<textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description de la course" required /><FieldError message={fieldErrors.description} /></label>
     <label>Tags<input value={form.tagsInput} onChange={(e) => setForm({ ...form, tagsInput: e.target.value })} placeholder="Ultra, Technique, Nocturne" required /><FieldError message={fieldErrors.tags} /></label>
     <label>URL source (optionnel)<input type="url" value={form.sourceUrl} onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })} placeholder="https://..." /><FieldError message={fieldErrors.sourceUrl} /></label>
-    {!initial ? <label>Fichier GPX (optionnel)<input type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" onChange={(e) => setForm({ ...form, gpxFile: e.target.files?.[0] ?? null })} /></label> : null}
+    <label>{initial ? 'Remplacer le GPX (optionnel)' : 'Fichier GPX (optionnel)'}<input type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" onChange={(e) => setForm({ ...form, gpxFile: e.target.files?.[0] ?? null })} /></label>
     <button type="submit">Enregistrer</button>
   </form>;
 }

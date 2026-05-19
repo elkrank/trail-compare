@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createAdminRace, deleteAdminRace, patchAdminRace, updateAdminRace } from '../../api/admin-races.service';
 import { getRaces } from '../../api/races.service';
-import type { CreateRaceDto, CreateRaceWithGpxPayload, RaceDto, UpdateRaceDto } from '../../api/types';
+import type { CreateRaceDto, CreateRaceWithGpxPayload, RaceDto, UpdateRaceWithGpxPayload } from '../../api/types';
 import { getAdminSessionState, logoutAdmin, subscribeToAdminSession } from '../../auth/session';
 import { AdminRaceForm } from '../components/AdminRaceForm';
 import { AppApiError, normalizeApiError } from '../../api/errors';
@@ -143,6 +143,6 @@ export function AdminRacesPage() {
       <button onClick={() => { setEditFieldErrors({}); setEditing(race); }}>Edit</button>
       <button onClick={async () => { try { setActionError(null); await deleteAdminRace(race.id); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }}>Delete</button></div>
     </li>)}</ul> : null}
-    {editing && !error ? <AdminRaceForm initial={editing} fieldErrors={editFieldErrors} globalError={Object.keys(editFieldErrors).length > 0 ? VALIDATION_GLOBAL_ERROR : undefined} onSubmit={async (v) => { try { setActionError(null); setEditFieldErrors({}); await updateAdminRace(editing.id, v as UpdateRaceDto); setEditing(null); await load(); } catch (err: unknown) { const normalizedError = normalizeApiError(err); const fieldErrors = extractValidationFieldErrors(normalizedError); if (fieldErrors) { setEditFieldErrors(fieldErrors); } else { setActionError(normalizedError); } } }} /> : null}
+    {editing && !error ? <AdminRaceForm initial={editing} fieldErrors={editFieldErrors} globalError={Object.keys(editFieldErrors).length > 0 ? VALIDATION_GLOBAL_ERROR : undefined} onSubmit={async (v) => { try { setActionError(null); setEditFieldErrors({}); await updateAdminRace(editing.id, v as UpdateRaceWithGpxPayload); setEditing(null); await load(); } catch (err: unknown) { const normalizedError = normalizeApiError(err); const fieldErrors = extractValidationFieldErrors(normalizedError); if (fieldErrors) { setEditFieldErrors(fieldErrors); } else { setActionError(normalizedError); } } }} /> : null}
   </div>;
 }

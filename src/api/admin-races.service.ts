@@ -1,5 +1,5 @@
 import { apiRequest } from './client';
-import type { CreateRaceWithGpxPayload, RaceDto, UpdateRaceDto } from './types';
+import type { CreateRaceWithGpxPayload, RaceDto, UpdateRaceDto, UpdateRaceWithGpxPayload } from './types';
 
 interface AdminRequestOptions {
   accessToken?: string;
@@ -8,7 +8,7 @@ interface AdminRequestOptions {
 const MULTIPART_RACE_PART_NAME = 'race';
 const MULTIPART_GPX_FILE_PART_NAME = 'gpxFile';
 
-function toMultipartCreateRacePayload(payload: CreateRaceWithGpxPayload & { gpxFile: File }): FormData {
+function toMultipartRacePayload(payload: (CreateRaceWithGpxPayload | UpdateRaceWithGpxPayload) & { gpxFile: File }): FormData {
   const { gpxFile, ...race } = payload;
   const formData = new FormData();
   formData.append(
@@ -24,7 +24,7 @@ export function createAdminRace(
   _options?: AdminRequestOptions,
 ): Promise<RaceDto> {
   const body = payload.gpxFile
-    ? toMultipartCreateRacePayload({ ...payload, gpxFile: payload.gpxFile })
+    ? toMultipartRacePayload({ ...payload, gpxFile: payload.gpxFile })
     : payload;
 
   return apiRequest<RaceDto>('/api/admin/races', {
@@ -35,12 +35,16 @@ export function createAdminRace(
 
 export function updateAdminRace(
   raceId: string,
-  payload: UpdateRaceDto,
+  payload: UpdateRaceWithGpxPayload,
   _options?: AdminRequestOptions,
 ): Promise<RaceDto> {
+  const body = payload.gpxFile
+    ? toMultipartRacePayload({ ...payload, gpxFile: payload.gpxFile })
+    : payload;
+
   return apiRequest<RaceDto>(`/api/admin/races/${encodeURIComponent(raceId)}`, {
     method: 'PUT',
-    body: payload,
+    body,
   });
 }
 
