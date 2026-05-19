@@ -97,6 +97,10 @@ export interface UpdateRaceDto {
   isCancelled?: boolean;
 }
 
+export interface UpdateRaceWithGpxPayload extends UpdateRaceDto {
+  gpxFile?: File;
+}
+
 export interface AdminLoginRequest {
   username: string;
   password: string;

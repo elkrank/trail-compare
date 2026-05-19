@@ -107,6 +107,39 @@ describe('admin-races.service', () => {
     expect(race.id).toBe('r1');
   });
 
+  it('updates race as multipart when a GPX file is provided', async () => {
+    setAccessToken('token-a');
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ id: 'r1', ...createRacePayload, isCancelled: false, createdAt: '', updatedAt: '' }),
+    } as Response);
+    const gpxFile = new File(['<gpx></gpx>'], 'replacement.gpx', { type: 'application/gpx+xml' });
+    const racePayload = { name: 'Ultra+', sourceUrl: 'https://example.com/ultra-plus' };
+
+    await updateAdminRace('r1', { ...racePayload, gpxFile });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/api/admin/races/r1'),
+      expect.objectContaining({ method: 'PUT' }),
+    );
+
+    const [, requestInit] = fetchMock.mock.calls[0];
+    const body = (requestInit as RequestInit).body;
+    const headers = (requestInit as RequestInit).headers as Record<string, string>;
+
+    expect(body).toBeInstanceOf(FormData);
+    expect(headers.Authorization).toBe('Bearer token-a');
+    expect(headers['Content-Type']).toBeUndefined();
+    expect(headers['content-type']).toBeUndefined();
+
+    const formData = body as FormData;
+    const racePart = formData.get('race');
+    expect(racePart).toBeInstanceOf(Blob);
+    await expect((racePart as Blob).text()).resolves.toBe(JSON.stringify(racePayload));
+    expect(formData.get('gpxFile')).toBe(gpxFile);
+  });
+
   it('update race with PATCH success', async () => {
     setAccessToken('token-a');
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
