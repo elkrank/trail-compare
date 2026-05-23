@@ -38,6 +38,371 @@ button { cursor:pointer; }
 .dark-footer { margin-top:1.5rem; background:#0c2814; color:#d8e8d8; border-radius:1.2rem; padding:1.8rem 1rem; }
 @media (max-width: 760px){ .app-header{top:0;padding:.9rem}.hero-block{padding:3rem .8rem} }
 
+.admin-races-page {
+  width: min(1240px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 3rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #dde4db;
+  border-radius: 1.1rem;
+  background: #f8faf7;
+  padding: 1.15rem;
+  box-shadow: 0 14px 30px rgba(16,32,23,.06);
+}
+
+.admin-page-header h1,
+.admin-panel-heading h2,
+.admin-form-heading h3,
+.admin-form-section h4 {
+  margin: 0;
+  color: #102017;
+}
+
+.admin-page-header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+}
+
+.admin-page-header .muted,
+.admin-panel-heading .muted {
+  margin: .28rem 0 0;
+}
+
+.admin-eyebrow {
+  margin: 0 0 .35rem;
+  color: #1f5f22;
+  font-size: .76rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.admin-races-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, .72fr);
+  grid-template-areas: "create list";
+  align-items: start;
+  gap: 1rem;
+}
+
+.admin-races-layout.has-edit-panel {
+  grid-template-areas:
+    "create edit"
+    "list edit";
+}
+
+.admin-panel {
+  min-width: 0;
+  border: 1px solid #dde4db;
+  border-radius: 1rem;
+  background: #ffffff;
+  padding: 1rem;
+  box-shadow: 0 14px 30px rgba(16,32,23,.06);
+}
+
+.admin-create-panel { grid-area: create; }
+.admin-list-panel { grid-area: list; }
+
+.admin-edit-panel {
+  grid-area: edit;
+  position: sticky;
+  top: 6rem;
+}
+
+.admin-panel-heading,
+.admin-form-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .85rem;
+}
+
+.admin-panel-heading {
+  margin-bottom: .9rem;
+}
+
+.admin-panel-heading h2 {
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.admin-form-heading {
+  padding-bottom: .15rem;
+}
+
+.admin-form-heading h3 {
+  font-size: 1.2rem;
+  line-height: 1.25;
+}
+
+.admin-count-badge,
+.admin-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.admin-count-badge {
+  border: 1px solid #d9e0d7;
+  background: #f8faf7;
+  color: #30453a;
+  padding: .3rem .65rem;
+}
+
+.admin-race-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-form-section {
+  display: grid;
+  gap: .7rem;
+  border-top: 1px solid #ebefea;
+  padding-top: .9rem;
+}
+
+.admin-form-section h4 {
+  font-size: .95rem;
+  line-height: 1.2;
+}
+
+.admin-form-grid {
+  display: grid;
+  gap: .75rem;
+}
+
+.admin-form-grid--compact {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.admin-form-grid--wide {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.admin-form-grid--single {
+  grid-template-columns: 1fr;
+}
+
+.admin-form-field {
+  min-width: 0;
+  display: grid;
+  gap: .35rem;
+  color: #30453a;
+  font-weight: 800;
+}
+
+.admin-form-field--full {
+  grid-column: 1 / -1;
+}
+
+.admin-form-label {
+  font-size: .85rem;
+}
+
+.admin-race-form input,
+.admin-race-form select,
+.admin-race-form textarea {
+  width: 100%;
+  min-width: 0;
+  border-color: #dce3d8;
+  background: #fffefb;
+}
+
+.admin-race-form textarea {
+  resize: vertical;
+  min-height: 7rem;
+}
+
+.admin-field-error,
+.admin-global-error {
+  color: #b91c1c;
+}
+
+.admin-field-error {
+  font-size: .82rem;
+  font-weight: 750;
+}
+
+.admin-global-error {
+  margin: 0;
+  font-weight: 800;
+}
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .65rem;
+  flex-wrap: wrap;
+}
+
+.admin-race-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: .75rem;
+}
+
+.admin-race-item {
+  display: grid;
+  gap: .85rem;
+  border: 1px solid #e1e6de;
+  border-radius: .9rem;
+  background: #fffefb;
+  padding: .9rem;
+}
+
+.admin-race-item.is-selected {
+  border-color: rgba(31,95,34,.52);
+  box-shadow: 0 0 0 3px rgba(31,95,34,.08);
+}
+
+.admin-race-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .85rem;
+}
+
+.admin-race-summary strong {
+  display: block;
+  color: #102017;
+  line-height: 1.25;
+}
+
+.admin-race-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem .65rem;
+  margin-top: .3rem;
+  color: #637268;
+  font-size: .9rem;
+}
+
+.admin-status-badge {
+  flex: 0 0 auto;
+  border: 1px solid #cfe0cf;
+  background: #eef6eb;
+  color: #1f5f22;
+  padding: .24rem .58rem;
+}
+
+.admin-status-badge.is-cancelled {
+  border-color: #f4c7c7;
+  background: #fff1f1;
+  color: #9f1d1d;
+}
+
+.admin-race-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.admin-race-actions button {
+  white-space: nowrap;
+}
+
+.admin-warning-button,
+.admin-danger-button {
+  border-radius: .75rem;
+  padding: .56rem .96rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-warning-button {
+  border-color: rgba(235,119,36,.28);
+  background: #fff7ef;
+  color: #9b4b13;
+}
+
+.admin-danger-button {
+  border-color: #f4c7c7;
+  background: #fff1f1;
+  color: #9f1d1d;
+}
+
+.admin-empty-state {
+  border: 1px dashed #d9e0d7;
+  border-radius: .9rem;
+  background: #f8faf7;
+  padding: 1rem;
+  color: #637268;
+}
+
+.admin-empty-state p {
+  margin: 0;
+}
+
+@media (max-width: 980px) {
+  .admin-races-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "create"
+      "list";
+  }
+
+  .admin-races-layout.has-edit-panel {
+    grid-template-areas:
+      "create"
+      "edit"
+      "list";
+  }
+
+  .admin-edit-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-races-page {
+    width: min(100% - 1rem, 1240px);
+    padding-top: 1rem;
+  }
+
+  .admin-page-header,
+  .admin-panel-heading,
+  .admin-race-summary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-page-header .secondary-btn,
+  .admin-panel-heading .secondary-btn,
+  .admin-form-actions button,
+  .admin-race-actions button {
+    width: 100%;
+  }
+
+  .admin-panel {
+    padding: .85rem;
+  }
+
+  .admin-form-actions,
+  .admin-race-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
 .compare-page { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 3rem; display: grid; gap: 1.35rem; }
 .compare-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 1rem; border: 1px solid #dde4db; border-radius: 1.3rem; padding: 1.2rem; background: radial-gradient(circle at 15% 20%, rgba(31,95,34,.08), transparent 30%), #f8faf7; }
 .compare-header .hero-title { margin: 0 0 .35rem; }
@@ -383,6 +748,41 @@ button { cursor:pointer; }
   font-size: .48rem;
   font-weight: 900;
   letter-spacing: .08em;
+}
+
+.race-detail-elevation {
+  margin: 1.5rem 0;
+}
+
+.race-detail-section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .75rem;
+}
+
+.race-detail-section-heading .section-title {
+  margin: 0;
+}
+
+.race-detail-section-heading span {
+  color: #5c685f;
+  font-size: .82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.race-detail-elevation-chart {
+  width: 100%;
+  height: 180px;
+  border: 1px solid #edf0e7;
+  border-radius: .9rem;
+  background: linear-gradient(180deg, #f8fbf5, #fffaf2);
+}
+
+.race-detail-elevation-fallback {
+  margin-top: .5rem;
 }
 
 .race-card-metrics {

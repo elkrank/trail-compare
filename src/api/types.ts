@@ -42,6 +42,22 @@ export interface SpringPageResponseDto<T> {
   size: number;
 }
 
+export interface RaceElevationProfilePointDto {
+  pointIndex: number;
+  distanceKm: number;
+  elevationM: number;
+}
+
+export interface RaceElevationProfileDto {
+  raceId: number;
+  distanceKm: number;
+  elevationGainM: number;
+  elevationLossM: number;
+  minElevationM: number;
+  maxElevationM: number;
+  points: RaceElevationProfilePointDto[];
+}
+
 export interface RaceFiltersDto {
   region?: string;
   terrain?: string;

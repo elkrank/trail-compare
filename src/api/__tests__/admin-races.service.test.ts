@@ -23,6 +23,17 @@ const createRacePayload: CreateRaceDto = {
   sourceUrl: 'https://example.com/ultra',
 };
 
+function readBlobText(blob: Blob): Promise<string> {
+  if (typeof blob.text === 'function') return blob.text();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => resolve(String(reader.result ?? '')));
+    reader.addEventListener('error', () => reject(reader.error));
+    reader.readAsText(blob);
+  });
+}
+
 describe('admin-races.service', () => {
   beforeEach(() => {
     clearAllTokens();
@@ -75,8 +86,9 @@ describe('admin-races.service', () => {
     const formData = body as FormData;
     const racePart = formData.get('race');
     expect(racePart).toBeInstanceOf(Blob);
-    await expect((racePart as Blob).text()).resolves.toBe(JSON.stringify(createRacePayload));
-    expect(formData.get('gpxFile')).toBe(gpxFile);
+    await expect(readBlobText(racePart as Blob)).resolves.toBe(JSON.stringify(createRacePayload));
+    expect(formData.get('gpx')).toBe(gpxFile);
+    expect(formData.get('gpxFile')).toBeNull();
   });
 
   it('does not set a manual Content-Type header for multipart creation', async () => {

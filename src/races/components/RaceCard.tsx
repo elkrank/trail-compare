@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from '../../router/AppRouter';
-import { getRaceGpx } from '../../api/races.service';
+import { getRaceElevationProfile } from '../../api/races.service';
 import type { Race } from '../types';
 import { computeDifficultyScore } from '../services';
-import { buildElevationProfilePath, parseGpxElevationProfile, type ElevationProfilePoint } from '../gpx';
+import { buildElevationProfilePath, type ElevationProfilePoint } from '../gpx';
 
 function formatRaceDate(date: string): string {
   if (!date) return 'Date à confirmer';
@@ -47,25 +47,27 @@ export function RaceCard({ race, onCompare }: { race: Race; onCompare?: (id: str
   const cutoffTimeMinutes = race.cutoffTimeMinutes || 0;
   const safeTags = race.tags ?? [];
   const elevationPerKm = Number.isFinite(race.elevationPerKm) ? race.elevationPerKm : elevationGainM / Math.max(distanceKm, 1);
-  const [gpxProfile, setGpxProfile] = useState<ElevationProfilePoint[] | undefined>();
+  const [elevationProfile, setElevationProfile] = useState<ElevationProfilePoint[] | undefined>();
 
   useEffect(() => {
-    const gpxUrl = race.gpxUrl ?? race.gpxFileUrl;
-    const shouldLoadGpx = Boolean(gpxUrl || race.hasGpx);
+    const shouldLoadProfile = Boolean(race.hasGpx);
     let isMounted = true;
 
-    setGpxProfile(undefined);
-    if (!shouldLoadGpx) return undefined;
+    setElevationProfile(undefined);
+    if (!shouldLoadProfile) return undefined;
 
-    getRaceGpx(race.id, gpxUrl)
-      .then((gpxXml) => {
-        if (!isMounted || !gpxXml) return;
-        const profile = parseGpxElevationProfile(gpxXml);
-        if (profile.length > 1) setGpxProfile(profile);
+    getRaceElevationProfile(race.id)
+      .then((profile) => {
+        if (!isMounted) return;
+        const points = profile?.points.map((point) => ({
+          distanceKm: point.distanceKm,
+          elevationM: point.elevationM,
+        })) ?? [];
+        if (points.length > 1) setElevationProfile(points);
       });
 
     return () => { isMounted = false; };
-  }, [race.gpxFileUrl, race.gpxUrl, race.hasGpx, race.id]);
+  }, [race.hasGpx, race.id]);
 
   return <article className="race-card fade-in-up">
     <div className="race-card-topline">
@@ -75,7 +77,7 @@ export function RaceCard({ race, onCompare }: { race: Race; onCompare?: (id: str
       </div>
     </div>
     <h3>{race.name || 'Course à confirmer'}</h3>
-    <AltitudeProfile distanceKm={distanceKm} elevationGainM={elevationGainM} profilePoints={gpxProfile} />
+    <AltitudeProfile distanceKm={distanceKm} elevationGainM={elevationGainM} profilePoints={elevationProfile} />
     <div className="race-card-metrics" aria-label="Métriques principales">
       <div><strong>{distanceKm}</strong><span>km</span></div>
       <div><strong>{elevationGainM}</strong><span>m D+</span></div>

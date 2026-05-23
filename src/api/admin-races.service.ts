@@ -6,7 +6,7 @@ interface AdminRequestOptions {
 }
 
 const MULTIPART_RACE_PART_NAME = 'race';
-const MULTIPART_GPX_FILE_PART_NAME = 'gpxFile';
+const MULTIPART_GPX_FILE_PART_NAME = 'gpx';
 
 function toMultipartCreateRacePayload(payload: CreateRaceWithGpxPayload & { gpxFile: File }): FormData {
   const { gpxFile, ...race } = payload;

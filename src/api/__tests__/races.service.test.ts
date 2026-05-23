@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getRaceGpx, getRaces } from '../races.service';
+import { getRaceElevationProfile, getRaceGpx, getRaces } from '../races.service';
 import { AppApiError } from '../errors';
 
 describe('races.service', () => {
@@ -43,6 +43,42 @@ describe('races.service', () => {
     } as Response);
 
     await expect(getRaceGpx('race-1')).resolves.toBeNull();
+  });
+
+  it('returns an elevation profile for a race', async () => {
+    const payload = {
+      raceId: 1,
+      distanceKm: 1.4,
+      elevationGainM: 140,
+      elevationLossM: 0,
+      minElevationM: 1200,
+      maxElevationM: 1340,
+      points: [
+        { pointIndex: 0, distanceKm: 0, elevationM: 1200 },
+        { pointIndex: 1, distanceKm: 1.4, elevationM: 1340 },
+      ],
+    };
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => payload,
+    } as Response);
+
+    await expect(getRaceElevationProfile('race-1')).resolves.toEqual(payload);
+
+    const [url, requestInit] = fetchMock.mock.calls[0];
+    expect(String(url)).toContain('/api/races/race-1/elevation-profile');
+    expect(requestInit).toEqual(expect.objectContaining({ method: 'GET' }));
+  });
+
+  it('returns null when an elevation profile is unavailable', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: async () => ({ message: 'not found' }),
+    } as Response);
+
+    await expect(getRaceElevationProfile('race-1')).resolves.toBeNull();
   });
 
   it.each([401, 404, 500])('returns mapped error on HTTP %s', async (status) => {

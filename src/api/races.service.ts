@@ -1,5 +1,11 @@
 import { apiRequest, buildApiUrl } from './client';
-import type { RaceDto, RaceFiltersDto, RaceListResponseDto, SpringPageResponseDto } from './types';
+import type {
+  RaceDto,
+  RaceElevationProfileDto,
+  RaceFiltersDto,
+  RaceListResponseDto,
+  SpringPageResponseDto,
+} from './types';
 
 type RawRaceListResponseDto = RaceListResponseDto | SpringPageResponseDto<RaceDto>;
 
@@ -24,6 +30,12 @@ export function getRaceById(id: string): Promise<RaceDto> {
   return apiRequest<RaceDto>(`/api/races/${encodeURIComponent(id)}`, {
     method: 'GET',
   });
+}
+
+export function getRaceElevationProfile(raceId: string): Promise<RaceElevationProfileDto | null> {
+  return apiRequest<RaceElevationProfileDto>(`/api/races/${encodeURIComponent(raceId)}/elevation-profile`, {
+    method: 'GET',
+  }).catch(() => null);
 }
 
 

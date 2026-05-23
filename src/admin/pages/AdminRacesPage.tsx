@@ -29,6 +29,8 @@ const RACE_FIELD_NAMES = new Set<keyof CreateRaceDto>([
   'sourceUrl',
 ]);
 
+const getRaceCountLabel = (count: number) => `${count} course${count > 1 ? 's' : ''}`;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -110,7 +112,14 @@ export function AdminRacesPage() {
 
     setLoading(true);
     setError(null);
-    try { const data = await getRaces({ page: 0, size: 100 }); setRaces(data.items); } catch (err: unknown) { setError(normalizeApiError(err)); } finally { setLoading(false); }
+    try {
+      const data = await getRaces({ page: 0, size: 100 });
+      setRaces(data.items);
+    } catch (err: unknown) {
+      setError(normalizeApiError(err));
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => {
     const unsubscribe = subscribeToAdminSession((state) => {
@@ -133,16 +142,163 @@ export function AdminRacesPage() {
     return null;
   }
 
-  return <div className="fade-in-up"><div className="admin-actions" style={{ justifyContent: 'space-between', alignItems: 'center' }}><h1>Admin races</h1><button type="button" onClick={handleLogout}>Déconnexion</button></div>
+  return <div className="admin-races-page fade-in-up">
+    <header className="admin-page-header">
+      <div>
+        <p className="admin-eyebrow">Administration</p>
+        <h1>Courses</h1>
+        <p className="muted">{getRaceCountLabel(races.length)} dans le catalogue</p>
+      </div>
+      <button type="button" className="secondary-btn" onClick={handleLogout}>Déconnexion</button>
+    </header>
+
     {actionError ? <InlineError error={actionError} /> : null}
     {loading ? <LoadingState /> : null}
     {!loading && error ? <ErrorState error={error} onRetry={load} showAdminRelogin={error.code === 'UNAUTHORIZED'} /> : null}
-    {!error ? <AdminRaceForm fieldErrors={createFieldErrors} globalError={Object.keys(createFieldErrors).length > 0 ? VALIDATION_GLOBAL_ERROR : undefined} onSubmit={async (v) => { try { setActionError(null); setCreateFieldErrors({}); await createAdminRace(v as CreateRaceWithGpxPayload); await load(); } catch (err: unknown) { const normalizedError = normalizeApiError(err); const fieldErrors = extractValidationFieldErrors(normalizedError); if (fieldErrors) { setCreateFieldErrors(fieldErrors); } else { setActionError(normalizedError); } } }} /> : null}
-    {!error ? <ul className="admin-list">{races.map((race) => <li className="admin-item" key={race.id}><div><strong>{race.name}</strong><div className="muted">{race.location} • {race.date} • {race.distanceKm} km</div></div>
-      <div className="admin-actions"><button onClick={async () => { try { setActionError(null); await patchAdminRace(race.id, { isCancelled: !race.isCancelled }); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }}>{race.isCancelled ? 'Réactiver' : 'Annuler'}</button>
-      <button onClick={() => { setEditFieldErrors({}); setEditing(race); }}>Edit</button>
-      <button onClick={async () => { try { setActionError(null); await deleteAdminRace(race.id); await load(); } catch (err: unknown) { setActionError(normalizeApiError(err)); } }}>Delete</button></div>
-    </li>)}</ul> : null}
-    {editing && !error ? <AdminRaceForm initial={editing} fieldErrors={editFieldErrors} globalError={Object.keys(editFieldErrors).length > 0 ? VALIDATION_GLOBAL_ERROR : undefined} onSubmit={async (v) => { try { setActionError(null); setEditFieldErrors({}); await updateAdminRace(editing.id, v as UpdateRaceDto); setEditing(null); await load(); } catch (err: unknown) { const normalizedError = normalizeApiError(err); const fieldErrors = extractValidationFieldErrors(normalizedError); if (fieldErrors) { setEditFieldErrors(fieldErrors); } else { setActionError(normalizedError); } } }} /> : null}
+
+    {!error ? <div className={`admin-races-layout ${editing ? 'has-edit-panel' : ''}`}>
+      <section className="admin-panel admin-create-panel">
+        <AdminRaceForm
+          fieldErrors={createFieldErrors}
+          globalError={Object.keys(createFieldErrors).length > 0 ? VALIDATION_GLOBAL_ERROR : undefined}
+          onSubmit={async (v) => {
+            try {
+              setActionError(null);
+              setCreateFieldErrors({});
+              await createAdminRace(v as CreateRaceWithGpxPayload);
+              await load();
+            } catch (err: unknown) {
+              const normalizedError = normalizeApiError(err);
+              const fieldErrors = extractValidationFieldErrors(normalizedError);
+              if (fieldErrors) {
+                setCreateFieldErrors(fieldErrors);
+              } else {
+                setActionError(normalizedError);
+              }
+            }
+          }}
+        />
+      </section>
+
+      <section className="admin-panel admin-list-panel" aria-labelledby="admin-list-title">
+        <div className="admin-panel-heading admin-list-heading">
+          <div>
+            <p className="admin-eyebrow">Catalogue</p>
+            <h2 id="admin-list-title">Courses enregistrées</h2>
+          </div>
+          <span className="admin-count-badge">{getRaceCountLabel(races.length)}</span>
+        </div>
+
+        {races.length > 0 ? <ul className="admin-race-list">
+          {races.map((race) => <li className={`admin-race-item ${editing?.id === race.id ? 'is-selected' : ''}`} key={race.id}>
+            <div className="admin-race-summary">
+              <div>
+                <strong>{race.name}</strong>
+                <div className="admin-race-meta">
+                  <span>{race.location}</span>
+                  <span>{race.date}</span>
+                  <span>{race.distanceKm} km</span>
+                </div>
+              </div>
+              <span className={`admin-status-badge ${race.isCancelled ? 'is-cancelled' : 'is-active'}`}>
+                {race.isCancelled ? 'Annulée' : 'Active'}
+              </span>
+            </div>
+            <div className="admin-race-actions">
+              <button
+                type="button"
+                className={race.isCancelled ? 'secondary-btn' : 'admin-warning-button'}
+                onClick={async () => {
+                  try {
+                    setActionError(null);
+                    await patchAdminRace(race.id, { isCancelled: !race.isCancelled });
+                    await load();
+                  } catch (err: unknown) {
+                    setActionError(normalizeApiError(err));
+                  }
+                }}
+              >
+                {race.isCancelled ? 'Réactiver' : 'Annuler'}
+              </button>
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => {
+                  setEditFieldErrors({});
+                  setEditing(race);
+                }}
+              >
+                Modifier
+              </button>
+              <button
+                type="button"
+                className="admin-danger-button"
+                onClick={async () => {
+                  try {
+                    setActionError(null);
+                    await deleteAdminRace(race.id);
+                    if (editing?.id === race.id) {
+                      setEditing(null);
+                    }
+                    await load();
+                  } catch (err: unknown) {
+                    setActionError(normalizeApiError(err));
+                  }
+                }}
+              >
+                Supprimer
+              </button>
+            </div>
+          </li>)}
+        </ul> : <div className="admin-empty-state">
+          <p>Aucune course enregistrée.</p>
+        </div>}
+      </section>
+
+      {editing ? <aside className="admin-panel admin-edit-panel" aria-labelledby="admin-edit-title">
+        <div className="admin-panel-heading">
+          <div>
+            <p className="admin-eyebrow">Modification</p>
+            <h2 id="admin-edit-title">{editing.name}</h2>
+          </div>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={() => {
+              setEditFieldErrors({});
+              setEditing(null);
+            }}
+          >
+            Fermer
+          </button>
+        </div>
+        <AdminRaceForm
+          initial={editing}
+          fieldErrors={editFieldErrors}
+          globalError={Object.keys(editFieldErrors).length > 0 ? VALIDATION_GLOBAL_ERROR : undefined}
+          onCancel={() => {
+            setEditFieldErrors({});
+            setEditing(null);
+          }}
+          onSubmit={async (v) => {
+            try {
+              setActionError(null);
+              setEditFieldErrors({});
+              await updateAdminRace(editing.id, v as UpdateRaceDto);
+              setEditing(null);
+              await load();
+            } catch (err: unknown) {
+              const normalizedError = normalizeApiError(err);
+              const fieldErrors = extractValidationFieldErrors(normalizedError);
+              if (fieldErrors) {
+                setEditFieldErrors(fieldErrors);
+              } else {
+                setActionError(normalizedError);
+              }
+            }
+          }}
+        />
+      </aside> : null}
+    </div> : null}
   </div>;
 }
